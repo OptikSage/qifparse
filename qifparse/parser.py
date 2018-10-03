@@ -53,7 +53,7 @@ class QifParser(object):
         for chunk in chunks:
             if not chunk:
                 continue
-            first_line = chunk.split('\n')[0]
+            first_line = chunk.split('\n')[0].strip()
             if first_line == '!Type:Cat':
                 last_type = 'category'
             elif first_line == '!Account':
@@ -70,7 +70,7 @@ class QifParser(object):
                 last_type = 'memorized'
                 transactions_header = first_line
             elif chunk.startswith('!'):
-                raise QifParserException('Header not reconized')
+                raise QifParserException('Header not reconized: {}'.format(first_line))
             # if no header is recognized then
             # we use the previous one
             item = parsers[last_type](chunk)
@@ -231,8 +231,8 @@ class QifParser(object):
                 curItem.date = cls_.parseQifDateTime(line[1:])
             elif line[0] == 'N':
                 curItem.num = line[1:]
-            elif line[0] == 'T':
-                curItem.amount = Decimal(line[1:])
+            elif line[0] == 'T' or line[0] == 'U':
+                curItem.amount = Decimal(line[1:].replace(',',''))
             elif line[0] == 'C':
                 curItem.cleared = line[1:]
             elif line[0] == 'P':
